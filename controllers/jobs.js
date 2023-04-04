@@ -31,6 +31,7 @@ const getJob = async (req, res) => {
 
 
 const updateJob = async (req, res) => {
+
     const {
         body:{company,position},
         user: { userId },
@@ -41,7 +42,9 @@ const updateJob = async (req, res) => {
         throw new BadRequestError('Company or position can not be empty');
     }
 
-    const job = await Job.findByIdAndUpdate({ _id: jobId, createdBy: userId }, req.body,
+    const job = await Job.findByIdAndUpdate(
+        { _id: jobId, createdBy: userId },
+        req.body,
         { new: true, runValidators: true });
 
         if (!job) {
@@ -52,9 +55,23 @@ const updateJob = async (req, res) => {
 
 
 
-
 const deleteJob = async (req, res) => {
-    res.send('deleteJob')
+    const {
+        user: { userId },
+        params: {id:jobId}  
+    } = req
+    
+    const job = await Job.findByIdAndRemove({
+        _id: jobId,
+        createdBy:userId
+    })
+
+    if (!job) {
+        throw new NotFoundError(`job was not found with ${jobId}`);
+    }
+
+    res.status(StatusCodes.OK).send('job was deleted');
+
 }
 
 module.exports = {
